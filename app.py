@@ -15,7 +15,7 @@ from src.ui.chatbot import show_chatbot_page  # NEW IMPORT
 warnings.filterwarnings('ignore')
 
 st.set_page_config(
-    page_title="AutoML Workbench",
+    page_title="Machine Learnning Studio",
     page_icon="🤖",
     layout="wide"
 )
@@ -172,4 +172,5 @@ elif selected_tab == "Insights":
 
 # --- NEW: Chatbot Page ---
 elif selected_tab == "Chatbot":
+
     show_chatbot_page()
