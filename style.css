@@ -1,0 +1,64 @@
+/* Main app container */
+body .stApp {
+    background-color: #0E1117;
+    color: #FAFAFA;
+}
+
+/* Main content area */
+div.main[data-testid="main"] {
+    background-color: #0E1117;
+}
+
+/* Custom button styling */
+div[data-testid="stButton"] > button {
+    border: 2px solid #4CAF50;
+    background-color: #0E1117;
+    color: #4CAF50;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+div[data-testid="stButton"] > button:hover {
+    background-color: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+}
+
+/* Style for the "Start Training" primary button */
+div[data-testid="stButton"] > button[kind="primary"] {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+}
+div[data-testid="stButton"] > button[kind="primary"]:hover {
+    background-color: #45a049;
+    color: white;
+}
+
+/* Streamlit-card component */
+div[data-testid="stVerticalBlock"] div[data-testid="element-container"] div[data-testid="stMarkdown"] {
+    /* This targets the card's container */
+    background-color: #1a1f2b;
+    border: 1px solid #2c3443;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+}
+
+/* Remove padding from the card's parent for a cleaner look */
+div[data-testid="stVerticalBlock"] div[data-testid="element-container"] {
+    padding: 0 !important;
+}
+
+/* Fix for metric card text */
+div[data-testid="stVerticalBlock"] div[data-testid="element-container"] div[data-testid="stMarkdown"] p {
+    color: #FAFAFA;
+    font-size: 1.1em;
+}
+
+/* Fix for metric card title */
+div[data-testid="stVerticalBlock"] div[data-testid="element-container"] div[data-testid="stMarkdown"] h3 {
+    color: #4CAF50;
+    font-size: 1.25em;
+    font-weight: bold;
+}
