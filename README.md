@@ -48,34 +48,37 @@ This application streamlines the entire ML pipeline into a simple, multi-page in
 * **AI/LLM:** Groq, python-dotenv
 
 ## 📁 Project Structure
-Auto-ML/
-├── .env                  # Stores API keys (GROQ_API_KEY)
-├── app.py                # The main Streamlit application
-├── requirements.txt      # All Python dependencies
-├── style.css             # Custom CSS for the dark-mode UI
+
+<pre>
+MachineLearning Studio/
+├── .env           # Stores API keys (GROQ_API_KEY)
+├── app.py         # The main Streamlit application
+├── requirements.txt # All Python dependencies
+├── style.css      # Custom CSS for the dark-mode UI
 └── src/
     ├── preprocessing/
-    │   └── core.py       # Data cleaning, encoding, scaling functions
+    │   └── core.py  # Data cleaning, encoding, scaling functions
     ├── training/
-    │   ├── train.py      # Model training & evaluation logic
-    │   └── tune.py       # Hyperparameter tuning grids & functions
+    │   ├── train.py # Model training & evaluation logic
+    │   └── tune.py  # Hyperparameter tuning grids & functions
     ├── ui/
-    │   ├── chatbot.py    # UI for the AI chatbot page
-    │   ├── evaluate.py   # UI for the model evaluation page
-    │   ├── explore.py    # UI for the data exploration page
-    │   ├── insights.py   # UI for the AI insights page
+    │   ├── chatbot.py   # UI for the AI chatbot page
+    │   ├── evaluate.py  # UI for the model evaluation page
+    │   ├── explore.py   # UI for the data exploration page
+    │   ├── insights.py  # UI for the AI insights page
     │   ├── preprocess.py # UI for the preprocessing page
-    │   └── train.py      # UI for the model training page
+    │   └── train.py     # UI for the model training page
     └── utils/
-        └── insights.py   # Groq client configuration & API call logic
+        └── insights.py # Groq client configuration & API call logic
+</pre>
 
 
 ## 🚀 Installation & Setup
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/your-username/Auto-ML.git](https://github.com/your-username/Auto-ML.git)
-    cd Auto-ML
+    git clone https://github.com/somethingshawnx/Machine_Learning-Studio.git
+    cd Machine_Learning-Studio
     ```
 
 2.  **Create a virtual environment:**
@@ -91,7 +94,7 @@ Auto-ML/
 
 4.  **Set up your API keys:**
     * Get a free API key from [Groq](https://groq.com/).
-    * Create a file named `.env` in the `Auto-ML` root folder.
+    * Create a file named `.env` in the `MachineLearning Studio` root folder.
     * Add your key to the file:
         ```
         GROQ_API_KEY="your_api_key_here"
