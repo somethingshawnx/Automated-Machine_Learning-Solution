@@ -2,7 +2,11 @@
 
 An interactive, end-to-end web application for automating the machine learning workflow. Built with Streamlit, this tool allows you to upload, visualize, preprocess, and train multiple models, then evaluate and tune the best-performing one. It even includes an AI-powered chatbot to help you analyze your results.
 
-
+<p align="center">
+  <a href="https://machinelearning-studio-vtixmlbzzcevpymirmmqgd.streamlit.app/">
+    <img src="https://img.shields.io/badge/Live-Demo-blue?style=for-the-badge&logo=streamlit" alt="Live Demo">
+  </a>
+</p>
 
 ## ✨ Features
 
