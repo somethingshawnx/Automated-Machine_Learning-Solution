@@ -5,12 +5,14 @@ import warnings
 # --- NEW: Forceful Path Fix ---
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Add the directory containing app.py (and src/) to the Python path
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(CURRENT_DIR)
 # --- END OF NEW FIX ---
 
 from streamlit_option_menu import option_menu
 
-# --- Import our UI modules ---
+# --- Import our UI modules (Absolute Imports) ---
 from src.ui.explore import show_explore_page
 from src.ui.preprocess import show_preprocess_page
 from src.ui.train import show_train_page
