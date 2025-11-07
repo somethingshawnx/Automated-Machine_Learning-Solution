@@ -12,7 +12,7 @@ sys.path.append(CURRENT_DIR)
 
 from streamlit_option_menu import option_menu
 
-# --- Import our UI modules (Absolute Imports) ---
+# --- Import our UI modules (using absolute imports) ---
 from src.ui.explore import show_explore_page
 from src.ui.preprocess import show_preprocess_page
 from src.ui.train import show_train_page
