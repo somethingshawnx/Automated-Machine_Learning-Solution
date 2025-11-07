@@ -4,13 +4,23 @@ import streamlit as st
 from dotenv import load_dotenv
 
 def configure_groq():
-    """Configures the Groq API with the key from .env"""
+    """Configures the Groq API."""
+    
+    # Try to load from .env (for local)
     load_dotenv()
     api_key = os.getenv("GROQ_API_KEY")
     
+    # If not in .env, try Streamlit secrets (for deployment)
     if not api_key:
-        st.error("GROQ_API_KEY not found in .env file.")
-        st.info("Please create a .env file in the root directory and add: GROQ_API_KEY='your_api_key'")
+        try:
+            api_key = st.secrets["GROQ_API_KEY"]
+        except Exception:
+            st.error("GROQ_API_KEY not found.")
+            st.info("Please add your GROQ_API_KEY to your .env file (local) or Streamlit secrets (deployment).")
+            return None
+    
+    if not api_key:
+        st.error("GROQ_API_KEY is not set.")
         return None
         
     try:
@@ -46,9 +56,7 @@ def get_data_overview(client, df):
                 {"role": "system", "content": "You are a helpful data analyst."},
                 {"role": "user", "content": prompt}
             ],
-            # --- THIS IS THE FIX ---
             model="llama-3.1-8b-instant", 
-            # --- END OF FIX ---
         )
         return chat_completion.choices[0].message.content
     except Exception as e:
@@ -82,9 +90,7 @@ def get_model_insights(client, results_df, best_model_name, feature_importances)
                 {"role": "system", "content": "You are a machine learning expert."},
                 {"role": "user", "content": prompt}
             ],
-            # --- THIS IS THE FIX ---
             model="llama-3.1-8b-instant",
-            # --- END OF FIX ---
         )
         return chat_completion.choices[0].message.content
     except Exception as e:
