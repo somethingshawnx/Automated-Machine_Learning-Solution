@@ -1,12 +1,13 @@
 import streamlit as st
+# --- THIS IS THE FIX ---
 from src.utils.insights import configure_groq
+# --- END OF FIX ---
 
-# --- RENAMED THIS FUNCTION ---
 def show_ai_assistant_page():
     """
     Renders the context-aware chatbot page.
     """
-    st.header("🤖 AI Assistant") # Changed title
+    st.header("🤖 AI Assistant")
     st.write("Ask general questions, or questions about your uploaded data and model results!")
 
     # Configure Groq client
@@ -15,7 +16,7 @@ def show_ai_assistant_page():
         st.error("AI Assistant is unavailable: Could not connect to Groq.")
         return
 
-    # Initialize chat history (done in app.py, but good to check)
+    # Initialize chat history
     if "messages" not in st.session_state:
         st.session_state.messages = [{"role": "assistant", "content": "How can I help you today?"}]
 
