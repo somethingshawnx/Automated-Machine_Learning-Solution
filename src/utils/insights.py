@@ -1,117 +1,91 @@
+from groq import Groq
+import os
 import streamlit as st
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from src.training.train import (
-    get_classification_models, get_regression_models,
-    train_models, evaluate_classification, evaluate_regression
-)
-import re
+from dotenv import load_dotenv
 
-def show_train_page(df: pd.DataFrame):
+def configure_groq():
+    """Configures the Groq API with the key from .env"""
+    load_dotenv()
+    api_key = os.getenv("GROQ_API_KEY")
+    
+    if not api_key:
+        st.error("GROQ_API_KEY not found in .env file.")
+        st.info("Please create a .env file in the root directory and add: GROQ_API_KEY='your_api_key'")
+        return None
+        
+    try:
+        client = Groq(api_key=api_key)
+        return client
+    except Exception as e:
+        st.error(f"Error configuring Groq: {e}")
+        return None
+
+def get_data_overview(client, df):
+    """Generates a data overview using Groq."""
+    
+    data_head = df.head().to_string()
+    data_describe = df.describe().to_string()
+    
+    prompt = f"""
+    You are a helpful data analyst. I have a dataset.
+    Here is the output of df.head():
+    {data_head}
+
+    Here is the output of df.describe():
+    {data_describe}
+
+    Please provide a brief, high-level overview of this data.
+    - What kind of data does it seem to be?
+    - Are there any obvious data quality issues or interesting patterns (e.g., high variance, potential outliers)?
+    - What are the key features?
     """
-    Renders the model training tab.
+    
+    try:
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": "You are a helpful data analyst."},
+                {"role": "user", "content": prompt}
+            ],
+            # --- THIS IS THE FIX ---
+            model="llama-3.1-8b-instant", 
+            # --- END OF FIX ---
+        )
+        return chat_completion.choices[0].message.content
+    except Exception as e:
+        return f"Error generating insights: {e}"
+
+def get_model_insights(client, results_df, best_model_name, feature_importances):
+    """Generates model insights using Groq."""
+    
+    results_string = results_df.to_string()
+    
+    prompt = f"""
+    You are a machine learning expert. I have trained several models and have the following results:
+    
+    Model Performance Table:
+    {results_string}
+    
+    The best performing model is: {best_model_name}
+    
+    Here are the top 10 feature importances for the best model:
+    {feature_importances.head(10).to_string()}
+    
+    Please provide a concise analysis:
+    1.  Explain in simple terms what the performance table means. Which model won and why?
+    2.  Based on the feature importances, what are the most important factors driving the predictions?
+    3.  Give one simple, actionable suggestion for how I could potentially improve the model (e.g., "You might want to investigate 'feature_x' more").
     """
-    st.header("Train Machine Learning Models")
     
-    # --- 1. LOAD TARGET VARIABLE (IT'S ALREADY IN SESSION STATE) ---
-    if 'target_variable' not in st.session_state or st.session_state['target_variable'] is None:
-        st.warning("Please select a target variable in the 'Preprocess' tab.")
-        return
-        
-    target_variable = st.session_state['target_variable']
-    
-    # Sanitize column names
-    df.columns = [re.sub(r'[^A-Za-z0-9_]+', '_', col) for col in df.columns]
-    
-    # Make sure target_variable is also sanitized
-    target_variable = re.sub(r'[^A-Za-z0-9_]+', '_', target_variable)
-    
-    # Check if sanitized target is in the columns
-    if target_variable not in df.columns:
-        st.error(f"Target variable '{target_variable}' not found in processed data columns.")
-        return
-
-    st.success(f"Target Variable: **{target_variable}**")
-
-    # 2. --- Select Problem Type ---
-    st.subheader("2. Select Problem Type")
-    
-    if pd.api.types.is_numeric_dtype(df[target_variable]):
-        # Check if it's *really* regression or just encoded classification
-        if df[target_variable].nunique() < 25: # Arbitrary threshold for classes
-            default_problem_type = "Classification"
-        else:
-            default_problem_type = "Regression"
-    else:
-        default_problem_type = "Classification"
-        
-    problem_type = st.radio(
-        "What type of problem is this?",
-        ("Classification", "Regression"),
-        index=0 if default_problem_type == "Classification" else 1
-    )
-    
-    # 3. --- Select Models ---
-    st.subheader("3. Select Models to Train")
-    
-    if problem_type == "Classification":
-        all_models = get_classification_models()
-    else:
-        all_models = get_regression_models()
-    
-    selected_model_names = st.multiselect(
-        "Choose models:", 
-        options=list(all_models.keys()), 
-        default=list(all_models.keys())[:3]
-    )
-    
-    models_to_train = {name: all_models[name] for name in selected_model_names}
-
-    # 4. --- Train/Test Split ---
-    st.subheader("4. Configure Train/Test Split")
-    test_size = st.slider("Test Set Size", 0.1, 0.5, 0.2, 0.05)
-    
-    # 5. --- Start Training ---
-    if st.button("Start Training", type="primary", disabled=(not models_to_train)):
-        
-        if not models_to_train:
-            st.warning("Please select at least one model to train.")
-            return
-
-        with st.spinner("Training models... This may take a moment."):
-            try:
-                X = df.drop(columns=[target_variable])
-                y = df[target_variable]
-                
-                # This logic is still needed for classification
-                if problem_type == "Classification" and not pd.api.types.is_numeric_dtype(y):
-                    y = y.astype('category').cat.codes
-                
-                X_train, X_test, y_train, y_test = train_test_split(
-                    X, y, test_size=test_size, random_state=42
-                )
-                
-                st.session_state['trained_models'] = train_models(X_train, y_train, models_to_train)
-                
-                if problem_type == "Classification":
-                    results_df = evaluate_classification(st.session_state['trained_models'], X_test, y_test)
-                else:
-                    results_df = evaluate_regression(st.session_state['trained_models'], X_test, y_test)
-                
-                st.session_state['model_results'] = results_df
-                st.session_state['X_train'] = X_train
-                st.session_state['y_train'] = y_train
-                st.session_state['X_test'] = X_test
-                st.session_state['y_test'] = y_test
-                st.session_state['problem_type'] = problem_type
-                st.session_state['tuned_model_results'] = None
-                
-                st.success("Model training and evaluation complete!")
-                
-            except Exception as e:
-                st.error(f"An error occurred during training: {e}")
-                
-    if 'model_results' in st.session_state and st.session_state['model_results'] is not None:
-        st.subheader("Model Performance Results")
-        st.dataframe(st.session_state['model_results'])
-        st.info("The best performing models are at the top. You can now analyze them in the 'Evaluate' tab.")
+    try:
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": "You are a machine learning expert."},
+                {"role": "user", "content": prompt}
+            ],
+            # --- THIS IS THE FIX ---
+            model="llama-3.1-8b-instant",
+            # --- END OF FIX ---
+        )
+        return chat_completion.choices[0].message.content
+    except Exception as e:
+        return f"Error generating insights: {e}"
