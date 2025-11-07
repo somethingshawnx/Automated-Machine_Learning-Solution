@@ -4,19 +4,21 @@ import streamlit as st
 from dotenv import load_dotenv
 
 def configure_groq():
-    """Configures the Groq API."""
+    """Configures the Groq API. Tries .env for local, then Streamlit secrets for deployment."""
     
-    # Try to load from .env (for local)
+    # 1. Try to load key from .env file (for local development)
     load_dotenv()
     api_key = os.getenv("GROQ_API_KEY")
     
-    # If not in .env, try Streamlit secrets (for deployment)
+    # 2. If not found in .env, try Streamlit secrets (for deployment)
     if not api_key:
         try:
+            # Note: st.secrets works automatically on Streamlit Cloud
             api_key = st.secrets["GROQ_API_KEY"]
         except Exception:
+            # If still not found, show error message
             st.error("GROQ_API_KEY not found.")
-            st.info("Please add your GROQ_API_KEY to your .env file (local) or Streamlit secrets (deployment).")
+            st.info("Please create a **.env** file in your root directory and add: GROQ_API_KEY='your_key_here'")
             return None
     
     if not api_key:
@@ -24,6 +26,7 @@ def configure_groq():
         return None
         
     try:
+        # Initialize Groq Client
         client = Groq(api_key=api_key)
         return client
     except Exception as e:
