@@ -1,14 +1,15 @@
 import streamlit as st
 import pandas as pd
-# --- UPDATED IMPORTS ---
+# --- THIS IS THE FIX ---
 from src.utils.insights import configure_groq, get_data_overview, get_model_insights
+# --- END OF FIX ---
 
 def show_insights_page():
     """Renders the AI-powered insights tab."""
     st.header("AI-Powered Data Insights (Groq)")
     
     # --- 1. Configure Groq ---
-    client = configure_groq() # Changed from configure_gemini()
+    client = configure_groq()
     if client is None:
         return # Stop execution if API is not configured
 
@@ -18,7 +19,6 @@ def show_insights_page():
         if st.session_state['data'] is not None:
             with st.spinner("Groq is analyzing your data... (this will be fast!)"):
                 df = st.session_state['data']
-                # --- UPDATED FUNCTION CALL ---
                 overview = get_data_overview(client, df)
                 st.markdown(overview)
         else:
@@ -33,9 +33,11 @@ def show_insights_page():
                 trained_models = st.session_state['trained_models']
                 X_test = st.session_state['X_test']
                 
+                # Get best model
                 best_model_name = results_df.iloc[0]['Model']
                 best_model = trained_models[best_model_name]
                 
+                # Get feature importances if they exist
                 if hasattr(best_model, 'feature_importances_'):
                     imp = pd.DataFrame({
                         'Feature': X_test.columns,
@@ -45,7 +47,6 @@ def show_insights_page():
                     imp = pd.DataFrame(columns=["Feature", "Importance"])
                     st.info("The best model does not have feature importances.")
                 
-                # --- UPDATED FUNCTION CALL ---
                 insights = get_model_insights(client, results_df, best_model_name, imp)
                 st.markdown(insights)
         else:
