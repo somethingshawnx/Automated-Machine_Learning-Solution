@@ -17,7 +17,8 @@ def show_explore_page(df: pd.DataFrame):
     # --- 2. Data Types (in an expander) ---
     with st.expander("🔡 Show Data Types"):
         st.write("Review the data types for each column.")
-        st.dataframe(df.dtypes.astype(str), width='stretch')
+        # --- FIX 1: Changed width='stretch' to use_container_width=True ---
+        st.dataframe(df.dtypes.astype(str), use_container_width=True)
 
     # --- 3. Correlation Heatmap ---
     st.subheader("🔥 Correlation Heatmap")
@@ -33,7 +34,8 @@ def show_explore_page(df: pd.DataFrame):
                         color_continuous_scale='RdYlBu_r',
                         title="Correlation Matrix")
         fig.update_layout(paper_bgcolor="#0E1117", plot_bgcolor="#0E1117", font_color="white")
-        st.plotly_chart(fig, width='stretch')
+        # --- FIX 2: Changed width='stretch' to use_container_width=True ---
+        st.plotly_chart(fig, use_container_width=True)
     else:
         st.info("No numerical columns found to calculate correlation.")
 
@@ -50,7 +52,7 @@ def show_explore_page(df: pd.DataFrame):
                 if pd.api.types.is_numeric_dtype(df[col]):
                     fig = px.histogram(df, x=col, marginal="box", title=f"Distribution of {col}")
                     fig.update_layout(paper_bgcolor="#0E1117", plot_bgcolor="#0E1117", font_color="white")
-                    st.plotly_chart(fig, width='stretch')
+                    st.plotly_chart(fig, use_container_width=True)
                 else:
                     st.write(f"**Value Counts for {col}**")
                     counts = df[col].value_counts().reset_index()
@@ -62,7 +64,7 @@ def show_explore_page(df: pd.DataFrame):
 
                     fig = px.bar(counts, x=col, y='count', title=f"Value Counts for {col}")
                     fig.update_layout(paper_bgcolor="#0E1117", plot_bgcolor="#0E1117", font_color="white")
-                    st.plotly_chart(fig, width='stretch')
+                    st.plotly_chart(fig, use_container_width=True)
 
             except Exception as e:
                 st.error(f"Could not plot {col}: {e}")
