@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
+# --- THIS IS THE FIX ---
 from src.preprocessing.core import (
+# --- END OF FIX ---
     handle_missing_values, 
     encode_categorical_features, 
     scale_numeric_features
@@ -14,7 +16,7 @@ def show_preprocess_page(df: pd.DataFrame):
     st.header("Clean and Preprocess Data")
     st.write("First, select your target variable. Then, apply transformations.")
     
-    # --- 1. SELECT TARGET VARIABLE (MOVED HERE) ---
+    # --- 1. SELECT TARGET VARIABLE ---
     st.subheader("1. Select Target Variable (Y)")
     all_columns = df.columns.tolist()
     
@@ -23,7 +25,7 @@ def show_preprocess_page(df: pd.DataFrame):
         try:
             default_target_index = all_columns.index(st.session_state['target_variable'])
         except ValueError:
-            pass
+            pass # Target not in columns, use default
             
     target_variable = st.selectbox(
         "Which column are you trying to predict?", 
@@ -74,12 +76,12 @@ def show_preprocess_page(df: pd.DataFrame):
                     df_processed, num_impute_strategy, cat_impute_strategy
                 )
                 
-                # Step 2: Encode Categorical Features (now passing target_variable)
+                # Step 2: Encode Categorical Features
                 df_processed = encode_categorical_features(
                     df_processed, target_variable, encoding_strategy
                 )
                 
-                # Step 3: Scale Numeric Features (now passing target_variable)
+                # Step 3: Scale Numeric Features
                 if scaling_strategy != 'none':
                     df_processed = scale_numeric_features(
                         df_processed, target_variable, scaling_strategy
