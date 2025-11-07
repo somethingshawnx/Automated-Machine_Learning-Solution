@@ -7,9 +7,10 @@ import numpy as np
 import pickle
 from io import BytesIO
 
-# --- IMPORTS FOR TUNING ---
+# --- THIS IS THE FIX ---
 from src.training.tune import get_param_grids, tune_model
 from src.training.train import get_classification_models, get_regression_models
+# --- END OF FIX ---
 
 # --- PLOTTING FUNCTIONS ---
 def plot_confusion_matrix(y_true, y_pred):
@@ -22,23 +23,31 @@ def plot_confusion_matrix(y_true, y_pred):
     fig.update_xaxes(side="top")
     st.plotly_chart(fig, width='stretch')
 
-def plot_roc_curve(y_true, y_proba):
-    fpr, tpr, _ = roc_curve(y_true, y_proba)
-    roc_auc = auc(fpr, tpr)
-    
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=fpr, y=tpr, mode='lines',
-                             name=f'ROC curve (area = {roc_auc:.2f})'))
-    fig.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode='lines',
-                             line=dict(dash='dash', color='gray'), name='Chance'))
-    
+def plot_roc_curve(y_true, y_proba, classes):
+    # Differentiate between binary and multiclass
+    if len(classes) == 2:
+        fpr, tpr, _ = roc_curve(y_true, y_proba)
+        roc_auc = auc(fpr, tpr)
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=fpr, y=tpr, mode='lines',
+                                 name=f'ROC curve (area = {roc_auc:.2f})'))
+        fig.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode='lines',
+                                 line=dict(dash='dash', color='gray'), name='Chance'))
+        fig.update_layout(title='Receiver Operating Characteristic (ROC) Curve')
+    else:
+        # Handling for multiclass (e.g., one-vs-rest) is more complex
+        # For simplicity, we'll note that ROC is typically for binary
+        st.info("ROC-AUC plot is typically shown for binary classification.")
+        return
+
     fig.update_layout(
-        title='Receiver Operating Characteristic (ROC) Curve',
-        xaxis_title='False PositiveRate',
+        xaxis_title='False Positive Rate',
         yaxis_title='True Positive Rate',
         paper_bgcolor="#0E1117", plot_bgcolor="#0E1117", font_color="white"
     )
     st.plotly_chart(fig, width='stretch')
+
 
 def plot_feature_importance(model, feature_names):
     if hasattr(model, 'feature_importances_'):
@@ -94,11 +103,9 @@ def show_evaluate_page():
     y_test = st.session_state['y_test']
     problem_type = st.session_state['problem_type']
     
-    # --- THIS IS THE NEW PART ---
     st.subheader("Model Comparison")
     with st.expander("Show Full Model Comparison Table (from 'Train' tab)"):
         st.dataframe(model_results)
-    # --- END OF NEW PART ---
 
     st.subheader("1. Select a Model to Evaluate")
     sorted_model_names = model_results['Model'].tolist()
@@ -130,7 +137,7 @@ def show_evaluate_page():
             with plot_col2:
                 if hasattr(model, 'predict_proba'):
                     y_proba = model.predict_proba(X_test)[:, 1]
-                    plot_roc_curve(y_test, y_proba)
+                    plot_roc_curve(y_test, y_proba, classes=np.unique(y_test))
                 else:
                     st.info("This model does not support `predict_proba`.")
             
@@ -159,7 +166,6 @@ def show_evaluate_page():
             
         st.divider()
 
-        # (The rest of the file is unchanged)
         col1, col2 = st.columns(2)
         
         with col1:
